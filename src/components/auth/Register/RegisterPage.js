@@ -17,6 +17,9 @@ const RegisterPage=() => {
         Password: '',
         ConfirmPassword: '',
         Photo: null,
+        errors:{
+            password: ''
+        }
     };
 
     //силка на наш формік
@@ -36,18 +39,24 @@ const RegisterPage=() => {
         {
             headers:{
                 'Content-Type' : 'multipart/form-data'
+
+
+            }
+        
+        }).then(resp => {
+            console.log("Good result", resp);
+            
+        }, bad => {
+            const {errors} = bad.response.data;
+            if(errors.Email) {
+                let stringa="";
+                errors.Email.forEach(message => {
+                    stringa += message + " ";
+                    console.log(message);
+                    formikRef.current.setFieldError("Email",message);
+                });
             }
         });
-        // console.log("Server submit data", values);
-        // console.log("Server submit file", JSON.stringify(
-        //     { 
-        //       fileName: values.photo.name, 
-        //       type: values.photo.type,
-        //       size: `${values.photo.size} bytes`
-        //     },
-        //     null,
-        //     2
-        //   ));
     }
 
 
