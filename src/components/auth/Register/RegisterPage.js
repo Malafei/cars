@@ -1,30 +1,28 @@
-import React, {useRef} from 'react'
+import React, {useRef, useState} from 'react'
 import validatonFields from './Validation';
 import {Formik, Form} from 'formik';
 import MyTextInput from "../../common/MyTextInput";
 import MyPhotoInput from '../../common/MyPhotoInput';
-import http from "../../../http_common"
-import { object } from 'prop-types';
-
+import http from "../../../http_common";
+import {useHistory} from 'react-router';
 
 const RegisterPage=() => {
 
     //це типу наш стейт
     const initState = {
-        Email: '',
-        Phone: '',
-        Login: '',
-        Password: '',
-        ConfirmPassword: '',
-        Photo: null,
-        errors:{
-            password: ''
-        }
+        email: '',
+        phone: '',
+        login: '',
+        password: '',
+        confirmPassword: '',
+        photo: null
     };
 
     //силка на наш формік
     const formikRef = useRef();
-
+    const [invalid, setInvalid] = useState([]);
+    const titleRef = useRef();
+    const history = useHistory();
 
     //функція яка викликається під час події он сабміт (умовно відправляє дані на сервер)
     const onSubmitHandler=(values) =>
@@ -39,23 +37,30 @@ const RegisterPage=() => {
         {
             headers:{
                 'Content-Type' : 'multipart/form-data'
-
-
             }
         
         }).then(resp => {
             console.log("Good result", resp);
+            history.push("/");
+        }, bad => { 
+            const errors =  bad.response.data.errors;
 
-        }, bad => {
-            const {errors} = bad.response.data;
-            if(errors.Email) {
-                let stringa="";
-                errors.Email.forEach(message => {
-                    stringa += message + " ";
-                    //console.log(message);
-                    formikRef.current.setFieldError("Email" ,message);
-                });
-            }
+            Object.entries(errors).forEach(([key, values]) => {
+                let message = '';
+                values.forEach(text=> message+=text+" ");
+                formikRef.current.setFieldError(key,message);
+            });
+            setInvalid(errors.invalid);
+            console.error(bad.response.data);
+            titleRef.current.scrollIntoView({ behavior: 'smooth' })
+
+            //const {errors} = bad.response.data;
+            // if(errors.email) {
+            // errors.email.forEach(message => {
+            //         formikRef.current.setFieldError("Email" ,message);
+            //     });
+            // }
+
         });
     }
 
@@ -63,7 +68,23 @@ const RegisterPage=() => {
     //ретурнимо нашу сторінку типу замість рендеру
     return (
         <div className="row">
-            <h1 className="text-center">Реєстрація</h1>
+            <h1 ref={titleRef} className="text-center">Реєстрація</h1>
+            {
+                invalid && invalid.length > 0 &&
+                <div className="alert alert-danger">
+                    <ul>
+                        {
+                            invalid.map((text, index) => {
+                                return (
+                                    <li key={index}>{text}</li>
+
+                                );
+                            })
+                        }
+                    </ul>
+                </div>
+
+            }
             <div className="offset-md-3 col-md-6">
             <Formik 
                 innerRef={formikRef}
@@ -75,50 +96,50 @@ const RegisterPage=() => {
                     {/* присвоюєм значення в наш текстовий інпут /common/MyTextInput */}
                     <MyTextInput
                         label = "Електрона пошта"
-                        name = "Email"
-                        type = "Email"
-                        id= "Email"
+                        name = "email"
+                        type = "email"
+                        id= "email"
                         placeH = "Введіть електрону пошту"
                     />
 
                     <MyTextInput
                         label = "Номер телефону"
-                        name = "Phone"
+                        name = "phone"
                         type = "Number"
-                        id= "Phone"
+                        id= "phone"
                         placeH = "+38(000)000-00-00"
                     />
 
                     <MyTextInput
                         label = "Логін"
-                        name = "Login"
+                        name = "login"
                         type = "text"
-                        id= "Login"
+                        id= "login"
                         placeH = "Введіть логін"
                     />
 
                     <MyTextInput
                         label = "Пароль"
-                        name = "Password"
+                        name = "password"
                         type = "password"
-                        id= "Password"
+                        id= "password"
                         placeH = "Введіть пароль"
                     />
 
                     <MyTextInput
                         label = "Повторіть пароль"
-                        name = "ConfirmPassword"
+                        name = "confirmPassword"
                         type = "password"
-                        id= "ConfirmPassword"
+                        id= "confirmPassword"
                         placeH = "Повторіть пароль"
                     />
 
 
                     {/* /common/MyPhotoInput */}
                     <MyPhotoInput
-                        Myfield = "Photo"
-                        name = "Photo"
-                        id= "Photo"
+                        Myfield = "photo"
+                        name = "photo"
+                        id= "photo"
                         formikRef={formikRef}
                     />
 
