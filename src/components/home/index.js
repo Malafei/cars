@@ -3,17 +3,21 @@ import { useSelector, useDispatch } from 'react-redux';
 import http from '../../http_common';
 import { Link } from 'react-router-dom'
 import { UserAll, UserDelete, UserEdit } from '../../actions/user';
+import EclipseWidget from '../common/eclipse';
 
 const HomePage = () => {
 
 
     const dispatch = useDispatch();
     const {list} =  useSelector(state => state.users);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         try{
             dispatch(UserAll())
-                .then()
+                .then(res => {
+                    setLoading(false);
+                })
                 .catch();
         }
         catch(error)
@@ -75,7 +79,8 @@ const HomePage = () => {
                                     <td>{user.login}</td>
                                     <td>{user.email}</td>
                                     <td>
-                                        <img src={"http://localhost:44797/" + user.image} alt={user.image} width="150"/>
+
+                                        <img src={"http://localhost:44797/" + user.image+"?t="+new Date().getTime()} alt={user.image} width="150"/>
                                     </td>
                                     <td>
                                         <button className="btn btn-danger" onClick={() => onDeleteClick(user.id)}>Delete</button>
@@ -88,6 +93,7 @@ const HomePage = () => {
                     }
                 </tbody>
             </table>
+            
         </div>
     );
 }

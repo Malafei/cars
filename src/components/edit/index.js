@@ -6,8 +6,8 @@ import MyTextInput from '../common/MyTextInput';
 import MyPhotoInput from '../common/MyPhotoInput';
 import {useHistory} from 'react-router';
 import { useDispatch } from 'react-redux';
-import { RegisterUser } from '../../actions/auth';
 import UserService from '../../services/user.service';
+import EclipseWidget from '../common/eclipse';
 
 const EditPage=() => {
 
@@ -22,7 +22,7 @@ const EditPage=() => {
     const formikRef = useRef();
     const [invalid, setInvalid] = useState([]);
     const [imagePath, setImagePath] = useState("");
-
+    const [loading, setLoading] = useState(true);
     const titleRef = useRef();
     const history = useHistory();
     const { id } = useParams();
@@ -33,28 +33,19 @@ const EditPage=() => {
 
     const onSubmitHandler=(values) =>
     {
+        console.log(values);
         const formData = new FormData();
-        Object.entries(values).forEach
-        (
-            ([key, value]) => formData.append(key, value)
-        );
-        
-        dispatch(RegisterUser(formData))
-        .then(result => {
-            history.push("/");
-        })
-        .catch(ex => {
-            const {errors} = ex;
-            console.log(errors);
-            Object.entries(errors).forEach(([key, values]) => {
-                let message = '';
-                values.forEach(text=> message+=text+" ");
-                formikRef.current.setFieldError(key,message);
-            });
-            setInvalid(errors.invalid);
-            titleRef.current.scrollIntoView({ behavior: 'smooth' })
-    
+        Object.entries(values).forEach(([key, value]) => formData.append(key, value));
+
+        Object.entries(values).forEach(([key, value]) => {
+            console.log("value", value);
         });
+
+        console.log(formData.values());
+
+        UserService.save(formData)
+            .then(res => history.push("/"));
+        
         
     }
 
@@ -65,10 +56,12 @@ const EditPage=() => {
             UserService.edit(id)
             .then(res =>{
                 const {data} = res;
+                formikRef.current.setFieldValue("id", id)
                 formikRef.current.setFieldValue("email", data.email)
                 formikRef.current.setFieldValue("login", data.login)
                 setImagePath("http://localhost:44797/" + data.image)
-                console.log("edit", res.data);
+                setLoading(false);
+                //console.log("edit", res.data);
             })
         }
         catch(error){
@@ -108,6 +101,13 @@ const EditPage=() => {
 
                     {/* присвоюєм значення в наш текстовий інпут /common/MyTextInput */}
                     <MyTextInput
+                        name = "id"
+                        type = "hidden"
+                        id= "id"
+                        value={id}
+                    />
+
+                    <MyTextInput
                         label = "Електрона пошта"
                         name = "email"
                         type = "email"
@@ -132,15 +132,17 @@ const EditPage=() => {
                         id= "photo"
                         formikRef={formikRef}
                         />
-}
+                    }
 
 
 
                     {/* кнопка відправки форми */}
-                    <button type="submit" className="btn btn-dark">Редагувати</button>
+                    <button type="submit" className="btn btn-dark">Зберегти</button>
                 </Form>
             </Formik>
             </div>
+
+            {loading&& <EclipseWidget/>}
         </div>
 
     )

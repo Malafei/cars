@@ -14,6 +14,15 @@ class UsersService{
     {
         return http.get(`api/users/edit/${id}`);
     }
+    
+    save(data) {
+        return http.put("api/users/save", data,
+        {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+    }
 
 
 }

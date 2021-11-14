@@ -13,6 +13,7 @@ const InputTextField = ({
     return(
 
     <div className="mb-3">
+        {type!= "hidden" && < label htmlFor={field}>{label}</label>}
         <label htmlfor={field}>{label}</label>
         <input type={type}
             className={classnames("form-control",
