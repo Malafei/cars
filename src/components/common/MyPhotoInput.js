@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useField } from 'formik';
 
-const MyPhotoInput = ({ Myfield, formikRef, ...props }) => {
+const MyPhotoInput = ({ Myfield, formikRef, data, ...props}) => {
 
 
     // фото яке показується по замовчувані
     // ми сказали шо у поле фото Буде закидать через сетфото
-    const [photo, setPhoto] = useState("https://bytes.ua/wp-content/uploads/2017/08/no-image.png");
+    const [photo, setPhoto] = useState(data ? data : "https://bytes.ua/wp-content/uploads/2017/08/no-image.png");
     // ми сказали шо у поле ерор Буде закидать через сетерор
     const [error, setError] = useState("");
 

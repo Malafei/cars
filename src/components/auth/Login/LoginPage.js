@@ -1,9 +1,10 @@
-import React, {useRef, useState} from 'react'
+import React, {useState} from 'react'
 import validatonFields from './Validation';
 import {Formik, Form} from 'formik';
 import MyTextInput from "../../common/MyTextInput";
-import http from "../../../http_common";
 import {useHistory} from 'react-router';
+import { LoginUser } from '../../../actions/auth';
+import { useDispatch } from 'react-redux';
 
 const LoginPage=()=>{
 
@@ -13,41 +14,20 @@ const LoginPage=()=>{
     };
 
 
-    const formikRef = useRef();
     const [invalid, setInvalid] = useState([]);
-    const titleRef = useRef();
+    const dispatch = useDispatch();
     const history = useHistory();
+
 
     const onSubmitHandler=(values) =>
     {
-        const formData = new FormData();
-        Object.entries(values).forEach
-        (
-            ([key, value]) => formData.append(key, value)
-        );
-
-        http.post("api/acount/login", formData,
-        {
-            headers:{
-                'Content-Type' : 'multipart/form-data'
-            }
-        
-        }).then(resp => {
-            console.log("Good result", resp);
-            history.push("/");
-        }, bad => { 
-            const errors =  bad.response.data.errors;
-
-            Object.entries(errors).forEach(([key, values]) => {
-                let message = '';
-                values.forEach(text=> message+=text+" ");
-                formikRef.current.setFieldError(key,message);
-            });
-            setInvalid(errors.invalid);
-            console.error(bad.response.data);
-            titleRef.current.scrollIntoView({ behavior: 'smooth' })
-        });
-        console.log("Server submit data", values);
+        dispatch(LoginUser(values))
+            .then(result => {
+                history.push("/");
+            })
+            .catch(ex => {
+                setInvalid(ex.errors.invalid);
+            })
     }
     
 
